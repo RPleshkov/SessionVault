@@ -1,0 +1,85 @@
+networks:
+  app_network:
+    driver: bridge
+
+
+services:
+  postgres:
+    image: postgres:latest
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB_NAME}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      PGPORT: "${POSTGRES_PORT}"
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - ./_data/postgres/data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_NAME} -p ${POSTGRES_PORT}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    ports:
+      - 5050:80
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD}"
+    depends_on:
+      - postgres
+    volumes:
+      - ./_data/pgadmin/:/var/lib/pgadmin/
+    networks:
+      - app_network
+
+  redis:
+    image: redis:6
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    environment:
+      REDIS_PORT: "${REDIS_PORT}"
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+      REDIS_USER: "${REDIS_USER}"
+    command: ["redis-server", "--port", "${REDIS_PORT}", "--requirepass", "${REDIS_PASSWORD}"]
+    networks:
+      - app_network
+  
+  main-app:
+    build: ./
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: "pgadmin"
+      POSTGRES_DB_NAME: "${POSTGRES_DB_NAME}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_PORT: "${POSTGRES_PORT}"
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_DEFAULT_EMAIL}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_DEFAULT_PASSWORD}"
+      REDIS_HOST: "redis"
+      REDIS_PORT: "${REDIS_PORT}"
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+      REDIS_USER: "${REDIS_USER}"
+      REDIS_DB: "${REDIS_DB}"
+      ACCESS_TOKEN_EXPIRE_MS: "${ACCESS_TOKEN_EXPIRE_MS}"
+      REFRESH_TOKEN_EXPIRE_MS: "${REFRESH_TOKEN_EXPIRE_MS}"
+      SMTP_HOST: "${SMTP_HOST}"
+      SMTP_PORT: "${SMTP_PORT}"
+      SMTP_USERNAME: "${SMTP_USERNAME}"
+      SMTP_PASSWORD: "${SMTP_PASSWORD}"
+      CONFIRMATION_EMAIL_CODE_LENGTH: "${CONFIRMATION_EMAIL_CODE_LENGTH}"
+      CONFIRMATION_EMAIL_CODE_TTL: "${CONFIRMATION_EMAIL_CODE_TTL}"
+      CONFIRMATION_EMAIL_CODE_RATE_LIMIT: "${CONFIRMATION_EMAIL_CODE_RATE_LIMIT}"
+      USER_SESSION_LIMIT: "${USER_SESSION_LIMIT}"
+    ports:
+      - 8000:8000
+    networks:
+      - app_network
