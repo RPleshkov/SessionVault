@@ -70,6 +70,9 @@ class SMTPConfig:
     password: SecretStr = env("SMTP_PASSWORD")
     confirmation_email_code_length: int = env.int("CONFIRMATION_EMAIL_CODE_LENGTH")
     confirmation_email_code_ttl: int = env.int("CONFIRMATION_EMAIL_CODE_TTL")
+    confirmation_email_code_rate_limit: int = env.int(
+        "CONFIRMATION_EMAIL_CODE_RATE_LIMIT"
+    )
 
 
 @dataclass
