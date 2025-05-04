@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.database.session import get_session
 from app.repository.user import create_user, get_user_by_email
 from app.schemas.user import UserCreate, UserResponse
+from app.services.mail_service import MailService
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -24,4 +25,5 @@ async def registration(
             status_code=status.HTTP_409_CONFLICT, detail="User already exists"
         )
 
+    await MailService.send_welcome_email(email=user_in.email, name=user_in.name)
     return await create_user(session, user_in)

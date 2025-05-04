@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from app.database.models import User
 from app.schemas.user import UserCreate
@@ -33,3 +33,5 @@ async def create_user(session: "AsyncSession", user_in: UserCreate) -> User:
     session.add(user)
     await session.commit()
     return user
+
+

@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from environs import Env
-from pydantic import PostgresDsn
+from pydantic import PostgresDsn, SecretStr
 
 env = Env()
 env.read_env()
@@ -63,6 +63,16 @@ class JWTConfig:
 
 
 @dataclass
+class SMTPConfig:
+    host: str = env("SMTP_HOST")
+    port: int = env.int("SMTP_PORT")
+    username: str = env("SMTP_USERNAME")
+    password: SecretStr = env("SMTP_PASSWORD")
+    confirmation_email_code_length: int = env.int("CONFIRMATION_EMAIL_CODE_LENGTH")
+    confirmation_email_code_ttl: int = env.int("CONFIRMATION_EMAIL_CODE_TTL")
+
+
+@dataclass
 class AppConfig:
     user_session_limit: int = env.int("USER_SESSION_LIMIT")
 
@@ -72,6 +82,7 @@ class Config:
     postgres: PostgresConfig = field(default_factory=PostgresConfig)
     jwt: JWTConfig = field(default_factory=JWTConfig)
     redis: RedisConfig = field(default_factory=RedisConfig)
+    smtp: SMTPConfig = field(default_factory=SMTPConfig)
     app: AppConfig = field(default_factory=AppConfig)
 
 
