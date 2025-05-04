@@ -48,9 +48,9 @@ docker compose down
 docker compose up -d
 ```
 
-### Применение миграций
+### Применение миграций и генерация сертификатов
 ```bash
-alembic upgrade head
+bash scripts/entrypoint.sh
 ```
 
 ## Запуск приложения

@@ -26,7 +26,7 @@ fi
 
 
 
-/app/.venv/bin/alembic upgrade head || {
+.venv/bin/alembic upgrade head || {
     echo "Migration failed"
     exit 1
     }
